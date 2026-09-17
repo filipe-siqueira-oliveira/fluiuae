@@ -15,4 +15,4 @@ export type {
   RecurringCharge,
   CreditCard,
   WhatsappSession,
-} from "../generated/prisma";
+} from "@prisma/client";

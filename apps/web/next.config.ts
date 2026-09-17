@@ -14,10 +14,10 @@ const next_config: NextConfig = {
   },
   outputFileTracingRoot: resolve(process.cwd(), "../.."),
   outputFileTracingIncludes: {
-    "/**/*": ["../../packages/database/generated/prisma/**/*"],
+    "/**/*": ["../../node_modules/.prisma/client/**/*"],
   },
   transpilePackages: ["@fluiuae/database", "@ant-design/icons", "antd"],
-  serverExternalPackages: ["bcryptjs", "logos-bancos-br"],
+  serverExternalPackages: ["@prisma/client", ".prisma/client", "bcryptjs", "logos-bancos-br"],
 };
 
 export default next_config;

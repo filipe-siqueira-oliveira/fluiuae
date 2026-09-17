@@ -1,4 +1,4 @@
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { load_root_environment } from "./load_root_environment";
 
 load_root_environment();
