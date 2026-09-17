@@ -9,3 +9,5 @@ build
 whatsapp_auth
 apps/web/public/bank_logos
 *.tsbuildinfo
+.env.*
+!.env.example
