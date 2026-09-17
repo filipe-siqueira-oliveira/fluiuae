@@ -5,11 +5,12 @@
   "scripts": {
     "copy:bank-logos": "node scripts/copy_bank_logos.mjs",
     "predev": "npm run copy:bank-logos",
-    "prebuild": "npm run copy:bank-logos",
+    "prebuild": "npm run prisma:generate && npm run copy:bank-logos",
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start --port 3000",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prisma:generate": "npm run generate --workspace @fluiuae/database"
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",

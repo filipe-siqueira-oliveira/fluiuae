@@ -12,6 +12,10 @@ const next_config: NextConfig = {
   compiler: {
     styledComponents: true,
   },
+  outputFileTracingRoot: resolve(process.cwd(), "../.."),
+  outputFileTracingIncludes: {
+    "/**/*": ["../../packages/database/generated/prisma/**/*"],
+  },
   transpilePackages: ["@fluiuae/database", "@ant-design/icons", "antd"],
   serverExternalPackages: ["bcryptjs", "logos-bancos-br"],
 };

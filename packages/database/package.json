@@ -5,6 +5,7 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
+    "postinstall": "prisma generate --schema prisma/schema.prisma",
     "generate": "prisma generate --schema prisma/schema.prisma",
     "migrate": "dotenv -e ../../.env -- prisma migrate dev --schema prisma/schema.prisma",
     "deploy": "dotenv -e ../../.env -- prisma migrate deploy --schema prisma/schema.prisma",
