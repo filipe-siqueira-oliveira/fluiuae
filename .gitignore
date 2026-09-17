@@ -1,0 +1,11 @@
+node_modules
+.next
+dist
+build
+.env
+.env.local
+*.log
+.DS_Store
+whatsapp_auth
+apps/web/public/bank_logos
+*.tsbuildinfo

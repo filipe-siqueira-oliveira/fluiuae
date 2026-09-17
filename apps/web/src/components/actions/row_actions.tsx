@@ -1,0 +1,10 @@
+"use client";
+
+import styled from "styled-components";
+
+export const RowActions = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+`;

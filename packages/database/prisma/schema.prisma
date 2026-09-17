@@ -1,0 +1,337 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  VIEWER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  SALARY
+}
+
+enum CategoryKind {
+  INCOME
+  EXPENSE
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum TransactionStatus {
+  PAID
+  PENDING
+}
+
+enum WhatsappSessionStatus {
+  DISCONNECTED
+  AWAITING_QR_SCAN
+  CONNECTED
+  EXPIRED
+}
+
+model User {
+  id            String   @id @default(uuid()) @db.Uuid
+  email         String   @unique
+  password_hash String
+  name          String
+  phone         String?
+  dashboard_widgets Json?
+  completed_tours String[] @default([])
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  owned_workspaces           Workspace[]           @relation("workspace_owner")
+  memberships                WorkspaceMember[]
+  sent_invitations           WorkspaceInvitation[] @relation("invitation_sender")
+  created_transactions       Transaction[]         @relation("transaction_creator")
+  created_fixed_transactions FixedTransaction[]    @relation("fixed_transaction_creator")
+  created_recurring_charges  RecurringCharge[]     @relation("recurring_charge_creator")
+  whatsapp_session           WhatsappSession?
+
+  @@map("users")
+}
+
+model Workspace {
+  id         String   @id @default(uuid()) @db.Uuid
+  name       String
+  owner_id   String   @db.Uuid
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  owner              User                  @relation("workspace_owner", fields: [owner_id], references: [id], onDelete: Cascade)
+  members            WorkspaceMember[]
+  invitations        WorkspaceInvitation[]
+  accounts           Account[]
+  categories         Category[]
+  transactions       Transaction[]
+  fixed_transactions FixedTransaction[]
+  recurring_charges  RecurringCharge[]
+  credit_cards       CreditCard[]
+  statement_payments CreditCardStatementPayment[]
+
+  @@index([owner_id])
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id           String     @id @default(uuid()) @db.Uuid
+  workspace_id String     @db.Uuid
+  user_id      String     @db.Uuid
+  role         MemberRole @default(VIEWER)
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
+
+  workspace Workspace @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([workspace_id, user_id])
+  @@index([user_id])
+  @@map("workspace_members")
+}
+
+model WorkspaceInvitation {
+  id            String           @id @default(uuid()) @db.Uuid
+  workspace_id  String           @db.Uuid
+  invited_by_id String           @db.Uuid
+  email         String
+  role          MemberRole       @default(VIEWER)
+  token         String           @unique
+  status        InvitationStatus @default(PENDING)
+  expires_at    DateTime
+  accepted_at   DateTime?
+  created_at    DateTime         @default(now())
+  updated_at    DateTime         @updatedAt
+
+  workspace  Workspace @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  invited_by User      @relation("invitation_sender", fields: [invited_by_id], references: [id], onDelete: Cascade)
+
+  @@index([workspace_id])
+  @@index([email, status])
+  @@map("workspace_invitations")
+}
+
+model Account {
+  id               String      @id @default(uuid()) @db.Uuid
+  workspace_id     String      @db.Uuid
+  name             String
+  type             AccountType @default(CHECKING)
+  institution      String?
+  institution_ispb String?
+  initial_balance  Decimal     @default(0) @db.Decimal(14, 2)
+  is_archived      Boolean     @default(false)
+  is_default       Boolean     @default(false)
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @updatedAt
+
+  workspace          Workspace          @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  transactions       Transaction[]      @relation("transaction_account")
+  incoming_transfers Transaction[]      @relation("transaction_destination_account")
+  fixed_transactions FixedTransaction[]
+  recurring_charges  RecurringCharge[]
+
+  @@unique([workspace_id, name])
+  @@index([workspace_id])
+  @@map("accounts")
+}
+
+model Category {
+  id           String       @id @default(uuid()) @db.Uuid
+  workspace_id String       @db.Uuid
+  name         String
+  kind         CategoryKind
+  color        String       @default("#6F6E77")
+  is_system    Boolean      @default(false)
+  is_default   Boolean      @default(false)
+  is_archived  Boolean      @default(false)
+  created_at   DateTime     @default(now())
+  updated_at   DateTime     @updatedAt
+
+  workspace          Workspace          @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  transactions       Transaction[]
+  fixed_transactions FixedTransaction[]
+  recurring_charges  RecurringCharge[]
+
+  @@unique([workspace_id, name, kind])
+  @@index([workspace_id])
+  @@map("categories")
+}
+
+model Transaction {
+  id                     String            @id @default(uuid()) @db.Uuid
+  workspace_id           String            @db.Uuid
+  account_id             String?           @db.Uuid
+  credit_card_id         String?           @db.Uuid
+  destination_account_id String?           @db.Uuid
+  category_id            String?           @db.Uuid
+  created_by_id          String?           @db.Uuid
+  fixed_transaction_id   String?           @db.Uuid
+  recurring_charge_id    String?           @db.Uuid
+  installment_number     Int?
+  type                   TransactionType
+  status                 TransactionStatus @default(PAID)
+  is_automatic_debit     Boolean           @default(false)
+  description            String
+  amount                 Decimal           @db.Decimal(14, 2)
+  issued_at              DateTime
+  due_date               DateTime?
+  paid_at                DateTime?
+  notes                  String?
+  created_at             DateTime          @default(now())
+  updated_at             DateTime          @updatedAt
+
+  workspace           Workspace         @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  account             Account?          @relation("transaction_account", fields: [account_id], references: [id], onDelete: Cascade)
+  credit_card         CreditCard?       @relation(fields: [credit_card_id], references: [id], onDelete: Restrict)
+  destination_account Account?          @relation("transaction_destination_account", fields: [destination_account_id], references: [id], onDelete: SetNull)
+  category            Category?         @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  created_by          User?             @relation("transaction_creator", fields: [created_by_id], references: [id], onDelete: SetNull)
+  fixed_transaction   FixedTransaction? @relation(fields: [fixed_transaction_id], references: [id], onDelete: SetNull)
+  recurring_charge    RecurringCharge?  @relation(fields: [recurring_charge_id], references: [id], onDelete: SetNull)
+  statement_payment   CreditCardStatementPayment?
+
+  @@index([workspace_id, issued_at])
+  @@index([workspace_id, status])
+  @@index([account_id])
+  @@index([credit_card_id])
+  @@index([category_id])
+  @@index([fixed_transaction_id])
+  @@index([recurring_charge_id])
+  @@map("transactions")
+}
+
+model FixedTransaction {
+  id                   String          @id @default(uuid()) @db.Uuid
+  workspace_id         String          @db.Uuid
+  account_id           String?         @db.Uuid
+  credit_card_id       String?         @db.Uuid
+  category_id          String?         @db.Uuid
+  created_by_id        String?         @db.Uuid
+  type                 TransactionType
+  description          String
+  amount               Decimal         @db.Decimal(14, 2)
+  day_of_month         Int
+  is_automatic_debit   Boolean         @default(false)
+  starts_at_month      DateTime        @db.Date
+  last_generated_month DateTime?       @db.Date
+  created_at           DateTime        @default(now())
+  updated_at           DateTime        @updatedAt
+
+  workspace    Workspace     @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  account      Account?      @relation(fields: [account_id], references: [id], onDelete: Cascade)
+  credit_card  CreditCard?   @relation(fields: [credit_card_id], references: [id], onDelete: Restrict)
+  category     Category?     @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  created_by   User?         @relation("fixed_transaction_creator", fields: [created_by_id], references: [id], onDelete: SetNull)
+  transactions Transaction[]
+
+  @@index([workspace_id, type])
+  @@map("fixed_transactions")
+}
+
+model WhatsappSession {
+  id                String                @id @default(uuid()) @db.Uuid
+  user_id           String                @unique @db.Uuid
+  status            WhatsappSessionStatus @default(DISCONNECTED)
+  phone_number      String?
+  qr_code           String?
+  credentials       Json?
+  signal_keys       Json?
+  last_connected_at DateTime?
+  last_error        String?
+  created_at        DateTime              @default(now())
+  updated_at        DateTime              @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("whatsapp_sessions")
+}
+
+model RecurringCharge {
+  id                   String    @id @default(uuid()) @db.Uuid
+  workspace_id         String    @db.Uuid
+  account_id           String?   @db.Uuid
+  credit_card_id       String?   @db.Uuid
+  category_id          String?   @db.Uuid
+  created_by_id        String?   @db.Uuid
+  description          String
+  installment_amount   Decimal   @db.Decimal(14, 2)
+  installment_count    Int
+  day_of_month         Int
+  is_automatic_debit   Boolean         @default(false)
+  starts_at_month      DateTime  @db.Date
+  last_generated_month DateTime? @db.Date
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+
+  workspace    Workspace     @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  account      Account?      @relation(fields: [account_id], references: [id], onDelete: Cascade)
+  credit_card  CreditCard?   @relation(fields: [credit_card_id], references: [id], onDelete: Restrict)
+  category     Category?     @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  created_by   User?         @relation("recurring_charge_creator", fields: [created_by_id], references: [id], onDelete: SetNull)
+  transactions Transaction[]
+
+  @@index([workspace_id])
+  @@map("recurring_charges")
+}
+
+model CreditCard {
+  id                    String   @id @default(uuid()) @db.Uuid
+  workspace_id          String   @db.Uuid
+  name                  String
+  institution           String?
+  institution_ispb      String?
+  credit_limit          Decimal  @db.Decimal(14, 2)
+  statement_closing_day Int
+  payment_due_day       Int
+  is_default            Boolean  @default(false)
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+
+  workspace          Workspace          @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  transactions       Transaction[]
+  fixed_transactions FixedTransaction[]
+  recurring_charges  RecurringCharge[]
+  statement_payments CreditCardStatementPayment[]
+
+  @@unique([workspace_id, name])
+  @@index([workspace_id])
+  @@map("credit_cards")
+}
+
+model CreditCardStatementPayment {
+  id              String   @id @default(uuid()) @db.Uuid
+  workspace_id    String   @db.Uuid
+  credit_card_id  String   @db.Uuid
+  transaction_id  String   @unique @db.Uuid
+  statement_month DateTime @db.Date
+  created_at      DateTime @default(now())
+
+  workspace   Workspace   @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
+  credit_card CreditCard  @relation(fields: [credit_card_id], references: [id], onDelete: Cascade)
+  transaction Transaction @relation(fields: [transaction_id], references: [id], onDelete: Cascade)
+
+  @@unique([credit_card_id, statement_month])
+  @@index([workspace_id])
+  @@map("credit_card_statement_payments")
+}

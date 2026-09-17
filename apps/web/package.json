@@ -1,0 +1,46 @@
+{
+  "name": "@fluiuae/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "copy:bank-logos": "node scripts/copy_bank_logos.mjs",
+    "predev": "npm run copy:bank-logos",
+    "prebuild": "npm run copy:bank-logos",
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.6.1",
+    "@ant-design/nextjs-registry": "^1.0.2",
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "@fluiuae/database": "*",
+    "@mantine/core": "^8.0.0",
+    "@mantine/hooks": "^8.0.0",
+    "@nivo/bar": "^0.99.0",
+    "@nivo/core": "^0.99.0",
+    "@nivo/line": "^0.99.0",
+    "@nivo/theming": "^0.99.0",
+    "antd": "^5.24.0",
+    "axios": "^1.7.9",
+    "bcryptjs": "^2.4.3",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.7",
+    "jose": "^5.9.6",
+    "logos-bancos-br": "^0.7.5",
+    "lucide-react": "^0.474.0",
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "styled-components": "^6.1.14",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.10.7",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "typescript": "^5.7.3"
+  }
+}

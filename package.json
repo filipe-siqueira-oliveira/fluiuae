@@ -1,0 +1,24 @@
+{
+  "name": "fluiuae",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @fluiuae/web",
+    "dev:whatsapp": "npm run dev --workspace @fluiuae/whatsapp",
+    "build": "npm run build --workspace @fluiuae/web",
+    "db:generate": "npm run generate --workspace @fluiuae/database",
+    "db:migrate": "npm run migrate --workspace @fluiuae/database",
+    "db:push": "npm run push --workspace @fluiuae/database",
+    "db:studio": "npm run studio --workspace @fluiuae/database"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
