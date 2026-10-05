@@ -1,9 +1,10 @@
+import { cache } from "react";
 import { prisma_client } from "@fluiuae/database";
 import { read_session_cookie } from "@/lib/session_cookie";
 import { unauthorized } from "@/lib/http_error";
 import type { AuthenticatedContext } from "@/types/session";
 
-export const find_authenticated_context = async (): Promise<AuthenticatedContext | null> => {
+export const find_authenticated_context = cache(async (): Promise<AuthenticatedContext | null> => {
   const session = await read_session_cookie();
 
   if (!session) {
@@ -41,7 +42,7 @@ export const find_authenticated_context = async (): Promise<AuthenticatedContext
     },
     role: membership.role,
   };
-};
+});
 
 export const require_authenticated_context = async (): Promise<AuthenticatedContext> => {
   const context = await find_authenticated_context();
