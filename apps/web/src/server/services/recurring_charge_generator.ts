@@ -1,11 +1,6 @@
 import { settle_due_automatic_debits } from "./automatic_debit_rules";
 import { resolve_generation_month } from "./generation_horizon";
-import {
-  TransactionStatus,
-  TransactionType,
-  prisma_client,
-  type RecurringCharge,
-} from "@fluiuae/database";
+import { TransactionStatus, prisma_client, type RecurringCharge } from "@fluiuae/database";
 import {
   build_date_in_month,
   earliest_month,
@@ -68,7 +63,7 @@ const generate_installments = async (
             recurring_charge.starts_at_month,
             month_start
           ),
-          type: TransactionType.EXPENSE,
+          type: recurring_charge.type,
           status: TransactionStatus.PENDING,
           is_automatic_debit: recurring_charge.is_automatic_debit,
           description: recurring_charge.description,

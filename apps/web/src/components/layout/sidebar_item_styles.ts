@@ -48,6 +48,12 @@ const sidebar_row = css<RowProps>`
   }
 `;
 
+export const SidebarItemButton = styled.button<RowProps>`
+  ${sidebar_row}
+  border: 0;
+  text-align: left;
+`;
+
 export const SidebarItemLink = styled(Link)<
   RowProps & { $is_active: boolean; $contains_active_child?: boolean; $has_chevron?: boolean }
 >`

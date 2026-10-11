@@ -13,6 +13,7 @@ import {
 import { ProgressRing, type ProgressRingTone } from "@/components/data/progress_ring";
 import { CategoryOptionLabel } from "@/features/categories/components/category_option_label";
 import { PaymentSourceCell } from "@/features/payment_sources/components/payment_source_cell";
+import { TransactionType } from "@fluiuae/database/enums";
 import { format_money } from "@/lib/money_formatter";
 import {
   format_charge_month,
@@ -50,12 +51,14 @@ const describe_remaining = (recurring_charge: RecurringChargeDto, phase: Recurri
   }
 
   const count = remaining_installments(recurring_charge);
+  const remaining_label = recurring_charge.type === TransactionType.INCOME ? "Falta receber" : "Falta";
 
-  return count === 0 ? "Última parcela" : `Falta ${format_money(recurring_charge.remaining_amount)}`;
+  return count === 0 ? "Última parcela" : `${remaining_label} ${format_money(recurring_charge.remaining_amount)}`;
 };
 
 export const RecurringChargeRow = ({ recurring_charge, can_write, on_edit }: RecurringChargeRowProps) => {
   const phase = resolve_charge_phase(recurring_charge);
+  const is_receivable = recurring_charge.type === TransactionType.INCOME;
 
   return (
     <AgendaRowItem>
@@ -75,6 +78,7 @@ export const RecurringChargeRow = ({ recurring_charge, can_write, on_edit }: Rec
         <AgendaText>
           <AgendaDescription title={recurring_charge.description}>{recurring_charge.description}</AgendaDescription>
           <AgendaMeta>
+            {is_receivable ? <span>A receber</span> : null}
             {recurring_charge.category ? (
               <CategoryOptionLabel name={recurring_charge.category.name} color={recurring_charge.category.color} />
             ) : (
@@ -86,7 +90,10 @@ export const RecurringChargeRow = ({ recurring_charge, can_write, on_edit }: Rec
           </AgendaMeta>
         </AgendaText>
         <AgendaValue>
-          <AgendaAmount>{format_money(recurring_charge.installment_amount)}</AgendaAmount>
+          <AgendaAmount>
+            {is_receivable ? "+ " : ""}
+            {format_money(recurring_charge.installment_amount)}
+          </AgendaAmount>
           <AgendaCaption $is_highlighted={phase === "active" && remaining_installments(recurring_charge) <= 1}>
             {describe_remaining(recurring_charge, phase)}
           </AgendaCaption>

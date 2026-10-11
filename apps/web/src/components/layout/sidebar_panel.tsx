@@ -12,6 +12,7 @@ import {
 } from "./sidebar_layout_styles";
 import { SidebarNavigationGroup } from "./sidebar_navigation_group";
 import { SidebarNavigationItem } from "./sidebar_navigation_item";
+import { SidebarShortcuts } from "./sidebar_shortcuts";
 import { SidebarUserMenu } from "./sidebar_user_menu";
 import { WorkspaceSwitcher } from "./workspace_switcher";
 import type { WorkspaceNavigation } from "./workspace_navigation";
@@ -59,6 +60,7 @@ export const SidebarPanel = ({ user, workspace_navigation, is_collapsed, is_bran
             )
           )}
         </SidebarNavigation>
+        <SidebarShortcuts is_collapsed={is_collapsed} workspaces={workspace_navigation.workspaces} />
       </SidebarScrollArea>
       <SidebarUserMenu user={user} is_collapsed={is_collapsed} />
     </PanelFrame>

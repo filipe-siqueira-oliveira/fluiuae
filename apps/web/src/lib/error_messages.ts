@@ -31,12 +31,15 @@ const error_messages: Record<string, string> = {
   network_error: "Sem conexão com o servidor. Confira sua internet e tente de novo.",
   owner_cannot_be_removed: "O dono da carteira não pode ser removido.",
   owner_role_cannot_change: "O papel do dono da carteira não pode ser alterado.",
+  payer_must_be_a_participant: "Quem pagou precisa ser uma das duas carteiras escolhidas.",
   recurring_charge_not_found: "Essa recorrência não existe mais. Atualize a página.",
   request_timeout: "O servidor demorou para responder. Tente de novo.",
   role_cannot_manage_members: "Só o dono da carteira pode gerenciar membros.",
   role_cannot_manage_workspace: "Só o dono da carteira pode fazer essa alteração.",
   role_cannot_write_data: "Você tem acesso só para visualizar esta carteira.",
   session_not_found: "Sua sessão expirou. Entre de novo.",
+  shared_purchase_without_amount: "Informe um valor de compra maior que zero.",
+  shares_need_distinct_workspaces: "Escolha uma carteira diferente para cada pessoa.",
   statement_already_paid: "Essa fatura já foi paga.",
   statement_has_no_purchases: "Essa fatura não tem compras para pagar.",
   statement_payment_locked: "Esse lançamento é o pagamento de uma fatura. Para mudar, desfaça o pagamento em Cartões e faturas.",
@@ -53,6 +56,7 @@ const error_messages: Record<string, string> = {
   user_not_member_of_workspace: "Você não faz mais parte dessa carteira.",
   user_without_workspace: "Sua conta não tem nenhuma carteira. Fale com quem convidou você.",
   validation_error: "Confira os dados preenchidos e tente de novo.",
+  workspace_without_account: "Uma das carteiras ainda não tem conta bancária. Cadastre uma conta nela antes de lançar.",
 };
 
 const status_messages: Record<number, string> = {

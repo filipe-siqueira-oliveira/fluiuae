@@ -274,6 +274,7 @@ model RecurringCharge {
   credit_card_id       String?   @db.Uuid
   category_id          String?   @db.Uuid
   created_by_id        String?   @db.Uuid
+  type                 TransactionType @default(EXPENSE)
   description          String
   installment_amount   Decimal   @db.Decimal(14, 2)
   installment_count    Int

@@ -138,6 +138,7 @@ export type FixedTransactionDto = {
 
 export type RecurringChargeDto = {
   id: string;
+  type: TransactionType;
   description: string;
   installment_amount: string;
   installment_count: number;
@@ -223,6 +224,17 @@ export type WhatsappSessionDto = {
   qr_code: string | null;
   last_connected_at: string | null;
   last_error: string | null;
+};
+
+export type PaymentSourceOptionDto = {
+  id: string;
+  name: string;
+  is_default: boolean;
+};
+
+export type WorkspacePaymentSourcesDto = {
+  accounts: PaymentSourceOptionDto[];
+  credit_cards: PaymentSourceOptionDto[];
 };
 
 export type WorkspaceSummaryDto = {

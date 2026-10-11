@@ -1,8 +1,7 @@
 import { MemberRole } from "@fluiuae/database/enums";
 import { translate_member_role } from "@/features/members/helpers/role_labels";
+import { read_first_name } from "@/lib/person_name";
 import type { WorkspaceSummaryDto } from "@/types/api";
-
-const read_first_name = (full_name: string): string => full_name.trim().split(/\s+/)[0] ?? full_name;
 
 export const describe_workspace_title = (workspace: WorkspaceSummaryDto): string =>
   workspace.role === MemberRole.OWNER ? workspace.name : `Carteira de ${read_first_name(workspace.owner_name)}`;

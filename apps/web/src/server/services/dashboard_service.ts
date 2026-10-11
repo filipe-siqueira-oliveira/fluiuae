@@ -168,7 +168,9 @@ export const build_dashboard = async (workspace_id: string, user_id: string): Pr
     ])
   );
   const active_charges = recurring_charges.filter(
-    (charge) => charge.generated_count < charge.installment_count || new Date(charge.starts_at_month) >= month_start
+    (charge) =>
+      charge.type === TransactionType.EXPENSE &&
+      (charge.generated_count < charge.installment_count || new Date(charge.starts_at_month) >= month_start)
   );
   const fixed_total = (type: TransactionType) =>
     Number(fixed_groups.find((group) => group.type === type)?._sum.amount ?? 0);

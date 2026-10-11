@@ -15,6 +15,7 @@ export const to_recurring_charge_dto = (
 
   return {
     id: recurring_charge.id,
+    type: recurring_charge.type,
     description: recurring_charge.description,
     installment_amount: serialize_decimal(recurring_charge.installment_amount),
     installment_count: recurring_charge.installment_count,

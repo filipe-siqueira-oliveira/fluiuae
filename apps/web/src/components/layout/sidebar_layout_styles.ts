@@ -67,6 +67,15 @@ export const SidebarNavigation = styled.nav`
   gap: 2px;
 `;
 
+export const SidebarShortcutList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid ${colors.border};
+`;
+
 export const SidebarLabel = styled.span<{ $is_collapsed: boolean }>`
   display: ${({ $is_collapsed }) => ($is_collapsed ? "none" : "inline")};
   overflow: hidden;

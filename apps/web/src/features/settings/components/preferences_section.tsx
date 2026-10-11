@@ -7,6 +7,10 @@ import { useRouter } from "next/navigation";
 import { http_client } from "@/lib/http_client";
 import { PageSection } from "@/components/feedback/page_section";
 import { read_sidebar_locked, store_sidebar_locked } from "@/components/layout/use_sidebar_collapse";
+import {
+  store_couple_calculator_in_sidebar,
+  use_couple_calculator_in_sidebar,
+} from "@/features/couple_calculator/hooks/use_couple_calculator_in_sidebar";
 import { use_theme_preference } from "@/providers/theme_preference_provider";
 import { dark_colors, light_colors } from "@/styles/color_schemes";
 import type { ThemePreference } from "@/styles/theme_preference_storage";
@@ -34,6 +38,7 @@ export const PreferencesSection = () => {
     router.refresh();
   };
   const [is_sidebar_locked, set_is_sidebar_locked] = useState(false);
+  const is_couple_calculator_in_sidebar = use_couple_calculator_in_sidebar();
 
   useEffect(() => {
     set_is_sidebar_locked(read_sidebar_locked());
@@ -74,6 +79,16 @@ export const PreferencesSection = () => {
             set_is_sidebar_locked(checked);
             store_sidebar_locked(checked);
           }}
+        />
+      </SettingsRow>
+      <SettingsRow
+        title="Calculadora do casal no menu"
+        description="Mostra no menu lateral um atalho para dividir compras na proporção da renda de cada um."
+      >
+        <Switch
+          checked={is_couple_calculator_in_sidebar}
+          aria-label="Mostrar calculadora do casal no menu"
+          onChange={(checked) => store_couple_calculator_in_sidebar(checked)}
         />
       </SettingsRow>
       <SettingsRow title="Explicações das telas" description="Mostra de novo o passo a passo da primeira visita em cada tela.">

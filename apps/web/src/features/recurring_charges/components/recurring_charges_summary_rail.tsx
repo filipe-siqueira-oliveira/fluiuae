@@ -1,6 +1,7 @@
 "use client";
 
-import { CalendarRange, Hourglass, Layers } from "lucide-react";
+import { CalendarRange, HandCoins, Hourglass, Layers } from "lucide-react";
+import { TransactionType } from "@fluiuae/database/enums";
 import { SummaryRail } from "@/components/data/summary_rail";
 import { format_money } from "@/lib/money_formatter";
 import { format_charge_month_long, summarize_recurring_charges } from "../helpers/recurring_charge_schedule";
@@ -13,8 +14,25 @@ type RecurringChargesSummaryRailProps = {
 const plural = (count: number, singular: string, many: string): string => (count === 1 ? `1 ${singular}` : `${count} ${many}`);
 
 export const RecurringChargesSummaryRail = ({ recurring_charges }: RecurringChargesSummaryRailProps) => {
-  const summary = summarize_recurring_charges(recurring_charges);
+  const summary = summarize_recurring_charges(
+    recurring_charges.filter((charge) => charge.type !== TransactionType.INCOME)
+  );
+  const receivable_summary = summarize_recurring_charges(
+    recurring_charges.filter((charge) => charge.type === TransactionType.INCOME)
+  );
   const icon_size = 15;
+  const receivable_items =
+    receivable_summary.remaining_installments > 0
+      ? [
+          {
+            key: "receivable",
+            label: "Ainda a receber",
+            icon: <HandCoins size={icon_size} strokeWidth={1.75} />,
+            value: format_money(receivable_summary.remaining_total),
+            hint: `Em ${plural(receivable_summary.remaining_installments, "parcela", "parcelas")} dos próximos meses`,
+          },
+        ]
+      : [];
 
   return (
     <SummaryRail
@@ -40,6 +58,7 @@ export const RecurringChargesSummaryRail = ({ recurring_charges }: RecurringChar
           value: summary.ending_first ? format_charge_month_long(summary.ending_first.ends_at_month) : "—",
           hint: summary.ending_first ? summary.ending_first.description : "Nenhuma recorrência ativa",
         },
+        ...receivable_items,
       ]}
     />
   );

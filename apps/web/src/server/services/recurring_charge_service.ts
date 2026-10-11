@@ -13,10 +13,14 @@ import { generate_due_recurring_charges } from "./recurring_charge_generator";
 import { recurring_charge_include } from "./recurring_charge_query";
 import { count_generated_installments } from "./recurring_charge_schedule";
 import type { RecurringChargeDto } from "@/types/api";
+import type { FixedTransactionType } from "@/validation/fixed_transaction_schemas";
 import type {
   CreateRecurringChargeInput,
   UpdateRecurringChargeInput,
 } from "@/validation/recurring_charge_schemas";
+
+const resolve_charge_type = (type: TransactionType): FixedTransactionType =>
+  type === TransactionType.INCOME ? TransactionType.INCOME : TransactionType.EXPENSE;
 
 const find_recurring_charge_or_fail = async (workspace_id: string, recurring_charge_id: string) => {
   const recurring_charge = await prisma_client.recurringCharge.findFirst({
@@ -100,9 +104,11 @@ export const update_recurring_charge = async (
     throw bad_request("installment_count_below_generated");
   }
 
+  const charge_type = resolve_charge_type(existing_charge.type);
+
   await assert_fixed_transaction_references({
     workspace_id,
-    type: TransactionType.EXPENSE,
+    type: charge_type,
     account_id: input.account_id,
     credit_card_id: input.credit_card_id,
     category_id: input.category_id,
@@ -118,7 +124,7 @@ export const update_recurring_charge = async (
       account_id: input.account_id ?? null,
       credit_card_id: input.credit_card_id ?? null,
       category_id: input.category_id ?? null,
-      is_automatic_debit: resolve_automatic_debit({ ...input, type: TransactionType.EXPENSE }),
+      is_automatic_debit: resolve_automatic_debit({ ...input, type: charge_type }),
     },
     include: recurring_charge_include,
   });

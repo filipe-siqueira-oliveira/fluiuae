@@ -8,7 +8,7 @@ import {
   is_credit_card_source,
   resolve_default_payment_source,
 } from "@/features/payment_sources/helpers/payment_source_value";
-import { CategoryKind } from "@fluiuae/database/enums";
+import { CategoryKind, TransactionType } from "@fluiuae/database/enums";
 import { find_default_category_id } from "@/lib/category_compatibility";
 import { ModalFooterWithDelete } from "@/components/feedback/modal_footer_with_delete";
 import { CategorySelect } from "@/features/categories/components/category_select";
@@ -45,9 +45,12 @@ export const RecurringChargeFormModal = ({
   on_delete,
 }: RecurringChargeFormModalProps) => {
   const [form] = Form.useForm<RecurringChargeFormValues>();
+  const is_receivable = recurring_charge?.type === TransactionType.INCOME;
+  const category_kind = is_receivable ? CategoryKind.INCOME : CategoryKind.EXPENSE;
   const selected_payment_source = Form.useWatch("payment_source", form);
   const is_automatic_debit = Form.useWatch("is_automatic_debit", { form, preserve: true }) ?? false;
-  const shows_automatic_debit = Boolean(selected_payment_source) && !is_credit_card_source(selected_payment_source);
+  const shows_automatic_debit =
+    !is_receivable && Boolean(selected_payment_source) && !is_credit_card_source(selected_payment_source);
   const installment_amount = Form.useWatch("installment_amount", form) ?? 0;
   const installment_count = Form.useWatch("installment_count", form) ?? 0;
   const minimum_count = Math.max(2, recurring_charge?.generated_count ?? 0);
@@ -60,19 +63,19 @@ export const RecurringChargeFormModal = ({
           resolve_default_payment_source({
             accounts,
             credit_cards,
-            allows_credit_card: true,
+            allows_credit_card: !is_receivable,
             falls_back_to_first_account: true,
           }),
-          find_default_category_id(categories, CategoryKind.EXPENSE)
+          find_default_category_id(categories, category_kind)
         )
       );
     }
-  }, [accounts, categories, credit_cards, form, is_open, recurring_charge]);
+  }, [accounts, categories, category_kind, credit_cards, form, is_open, is_receivable, recurring_charge]);
 
   return (
     <Modal
       open={is_open}
-      title={recurring_charge ? "Editar recorrência" : "Nova recorrência"}
+      title={recurring_charge ? (is_receivable ? "Editar recorrência a receber" : "Editar recorrência") : "Nova recorrência"}
       okText="Salvar"
       cancelText="Cancelar"
       confirmLoading={is_submitting}
@@ -161,17 +164,22 @@ export const RecurringChargeFormModal = ({
           <Col xs={24} sm={12}>
             <Form.Item
               name="payment_source"
-              label="Pagar com"
-              rules={[{ required: true, message: "Escolha uma conta ou um cartão" }]}
+              label={is_receivable ? "Receber em" : "Pagar com"}
+              rules={[{ required: true, message: is_receivable ? "Escolha uma conta" : "Escolha uma conta ou um cartão" }]}
             >
-              <PaymentSourceSelect accounts={accounts} credit_cards={credit_cards} allows_credit_card />
+              <PaymentSourceSelect
+                accounts={accounts}
+                credit_cards={credit_cards}
+                allows_credit_card={!is_receivable}
+                placeholder={is_receivable ? "Escolha uma conta" : undefined}
+              />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
             <Form.Item name="category_id" label="Categoria">
               <CategorySelect
                 categories={categories}
-                kind={CategoryKind.EXPENSE}
+                kind={category_kind}
                 current_category={recurring_charge?.category}
               />
             </Form.Item>
