@@ -57,6 +57,7 @@ export type CreditCardStatementPaymentDto = {
   transaction_id: string;
   amount: string;
   paid_at: string;
+  is_advance: boolean;
   account: { id: string; name: string } | null;
 };
 
@@ -68,7 +69,9 @@ export type CreditCardStatementDetailDto = {
   phase: "OPEN" | "CLOSED" | "UPCOMING";
   status: "PAID" | "OVERDUE" | "PENDING";
   total: string;
-  payment: CreditCardStatementPaymentDto | null;
+  paid_amount: string;
+  remaining_amount: string;
+  payments: CreditCardStatementPaymentDto[];
   purchases: TransactionDto[];
 };
 

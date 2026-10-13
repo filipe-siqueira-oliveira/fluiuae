@@ -62,3 +62,6 @@ export const resolve_statement_status = (input: {
 
 export const to_statement_key = (statement_month: Date): string =>
   `${statement_month.getUTCFullYear()}-${String(statement_month.getUTCMonth() + 1).padStart(2, "0")}`;
+
+export const is_paid_before_closing = (paid_at: Date, statement_month: Date, closing_day: number): boolean =>
+  resolve_statement_month(paid_at, closing_day).getTime() <= statement_month.getTime();

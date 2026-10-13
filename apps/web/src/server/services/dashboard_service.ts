@@ -132,8 +132,8 @@ export const build_dashboard = async (workspace_id: string, user_id: string): Pr
     card_statements
       .filter(
         (statement) =>
-          !statement.payment &&
-          Number(statement.total) > 0 &&
+          statement.status !== "PAID" &&
+          Number(statement.remaining_amount) > 0 &&
           (statement.status === "OVERDUE" || new Date(statement.due_date) <= limit_date)
       )
       .map((statement) => ({
@@ -141,7 +141,7 @@ export const build_dashboard = async (workspace_id: string, user_id: string): Pr
         kind: "statement" as const,
         description: `Fatura ${card.name}`,
         detail: statement.phase === "OPEN" ? "Fatura aberta" : "Fatura fechada",
-        amount: statement.total,
+        amount: statement.remaining_amount,
         due_date: statement.due_date,
         is_income: false,
         is_overdue: statement.status === "OVERDUE",

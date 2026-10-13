@@ -3,6 +3,7 @@ import type { CreditCardCommitmentsDto, CreditCardStatementDetailDto } from "@/t
 
 export type StatementPaymentPayload = {
   account_id: string;
+  amount: number;
   paid_at: string;
 };
 
@@ -19,14 +20,15 @@ export const pay_statement_request = async (
   statement_key: string,
   payload: StatementPaymentPayload
 ): Promise<void> => {
-  await http_client.post(`/credit-cards/${credit_card_id}/statements/${statement_key}/payment`, payload);
+  await http_client.post(`/credit-cards/${credit_card_id}/statements/${statement_key}/payments`, payload);
 };
 
 export const undo_statement_payment_request = async (
   credit_card_id: string,
-  statement_key: string
+  statement_key: string,
+  transaction_id: string
 ): Promise<void> => {
-  await http_client.delete(`/credit-cards/${credit_card_id}/statements/${statement_key}/payment`);
+  await http_client.delete(`/credit-cards/${credit_card_id}/statements/${statement_key}/payments/${transaction_id}`);
 };
 
 export const fetch_credit_card_commitments = async (credit_card_id: string): Promise<CreditCardCommitmentsDto> => {

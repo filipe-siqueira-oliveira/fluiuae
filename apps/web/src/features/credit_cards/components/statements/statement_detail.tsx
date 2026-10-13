@@ -5,6 +5,7 @@ import { Input } from "antd";
 import { Search } from "lucide-react";
 import { format_money } from "@/lib/money_formatter";
 import { filter_statement_purchases, group_purchases_by_day } from "../../helpers/statement_purchase_groups";
+import { StatementPaymentList } from "./statement_payment_list";
 import { StatementPurchaseRow } from "./statement_purchase_row";
 import {
   PurchaseDayGroup,
@@ -15,15 +16,18 @@ import {
   StatementMessage,
   StatementPurchasesScroller,
 } from "./statements_modal_styles";
-import type { CreditCardStatementDetailDto } from "@/types/api";
+import type { CreditCardStatementDetailDto, CreditCardStatementPaymentDto } from "@/types/api";
 
 type StatementDetailProps = {
   statement: CreditCardStatementDetailDto;
+  can_write: boolean;
+  on_undo_payment: (payment: CreditCardStatementPaymentDto) => void;
 };
 
-export const StatementDetail = ({ statement }: StatementDetailProps) => {
+export const StatementDetail = ({ statement, can_write, on_undo_payment }: StatementDetailProps) => {
   const [query, set_query] = useState("");
   const day_groups = group_purchases_by_day(filter_statement_purchases(statement.purchases, query));
+  const shows_payments = statement.payments.length > 0 && !query.trim();
 
   const render_purchases = () => {
     if (statement.purchases.length === 0) {
@@ -60,7 +64,12 @@ export const StatementDetail = ({ statement }: StatementDetailProps) => {
         placeholder="Buscar na fatura..."
         aria-label="Buscar na fatura"
       />
-      <StatementPurchasesScroller>{render_purchases()}</StatementPurchasesScroller>
+      <StatementPurchasesScroller>
+        {shows_payments ? (
+          <StatementPaymentList statement={statement} can_write={can_write} on_undo={on_undo_payment} />
+        ) : null}
+        {render_purchases()}
+      </StatementPurchasesScroller>
     </StatementDetailColumn>
   );
 };

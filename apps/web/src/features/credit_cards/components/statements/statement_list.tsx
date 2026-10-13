@@ -3,7 +3,11 @@
 import { useEffect, useRef } from "react";
 import { format_money } from "@/lib/money_formatter";
 import { format_statement_short_month } from "../../helpers/statement_labels";
-import { describe_statement_list_state, resolve_statement_list_tone } from "../../helpers/statement_status_labels";
+import {
+  describe_statement_list_state,
+  resolve_statement_display_amount,
+  resolve_statement_list_tone,
+} from "../../helpers/statement_status_labels";
 import { StatementRowAmount, StatementRowButton, StatementRowLabel, StatementRows } from "./statement_side_styles";
 import type { CreditCardStatementDetailDto } from "@/types/api";
 
@@ -46,7 +50,7 @@ export const StatementList = ({ statements, selected_key, on_select }: Statement
                 <StatementRowLabel $tone={tone}>
                   {format_statement_short_month(statement.due_date)} · {describe_statement_list_state(statement)}
                 </StatementRowLabel>
-                <StatementRowAmount>{format_money(statement.total)}</StatementRowAmount>
+                <StatementRowAmount>{format_money(resolve_statement_display_amount(statement))}</StatementRowAmount>
               </StatementRowButton>
             </li>
           );

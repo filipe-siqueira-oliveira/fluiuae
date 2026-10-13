@@ -15,13 +15,24 @@ const status_badges: Record<CreditCardStatementDetailDto["status"], StatementBad
 export const has_statement_charges = (statement: CreditCardStatementDetailDto): boolean =>
   Number(statement.total) > 0;
 
+export const is_statement_paid = (statement: CreditCardStatementDetailDto): boolean => statement.status === "PAID";
+
+export const has_statement_payments = (statement: CreditCardStatementDetailDto): boolean =>
+  statement.payments.length > 0;
+
+export const can_pay_statement = (statement: CreditCardStatementDetailDto): boolean =>
+  statement.phase !== "UPCOMING" && Number(statement.remaining_amount) > 0;
+
+export const resolve_statement_display_amount = (statement: CreditCardStatementDetailDto): string =>
+  is_statement_paid(statement) ? statement.total : statement.remaining_amount;
+
 export const resolve_statement_badge = (statement: CreditCardStatementDetailDto): StatementBadge =>
-  statement.payment || has_statement_charges(statement)
+  has_statement_payments(statement) || has_statement_charges(statement)
     ? status_badges[statement.status]
     : { label: "Sem compras", tone: "neutral" };
 
 export const describe_statement_list_state = (statement: CreditCardStatementDetailDto): string => {
-  if (statement.payment) {
+  if (is_statement_paid(statement)) {
     return "Paga";
   }
 
@@ -42,7 +53,7 @@ export const pick_initial_statement_key = (statements: CreditCardStatementDetail
 export type StatementListTone = "paid" | "overdue" | "pending" | "open" | "muted";
 
 export const resolve_statement_list_tone = (statement: CreditCardStatementDetailDto): StatementListTone => {
-  if (statement.payment) {
+  if (is_statement_paid(statement)) {
     return "paid";
   }
 

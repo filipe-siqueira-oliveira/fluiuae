@@ -332,7 +332,7 @@ model CreditCardStatementPayment {
   credit_card CreditCard  @relation(fields: [credit_card_id], references: [id], onDelete: Cascade)
   transaction Transaction @relation(fields: [transaction_id], references: [id], onDelete: Cascade)
 
-  @@unique([credit_card_id, statement_month])
+  @@index([credit_card_id, statement_month])
   @@index([workspace_id])
   @@map("credit_card_statement_payments")
 }

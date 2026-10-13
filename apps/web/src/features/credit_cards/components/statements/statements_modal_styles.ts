@@ -137,6 +137,16 @@ export const PurchaseAmount = styled.span`
   }
 `;
 
+export const PaymentRowValue = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+export const PaymentCreditAmount = styled(PurchaseAmount)`
+  color: ${colors.primary};
+`;
+
 export const StatementMessage = styled.div`
   margin: 0;
   padding: 24px 12px;

@@ -18,7 +18,12 @@ import { StatementOverview } from "./statement_overview";
 import { SideColumn } from "./statement_side_styles";
 import { StatementPaymentModal } from "./statement_payment_modal";
 import { StatementMessage, StatementsLayout } from "./statements_modal_styles";
-import type { AccountDto, CreditCardDto, CreditCardStatementDetailDto } from "@/types/api";
+import type {
+  AccountDto,
+  CreditCardDto,
+  CreditCardStatementDetailDto,
+  CreditCardStatementPaymentDto,
+} from "@/types/api";
 
 type CreditCardStatementsContentProps = {
   credit_card: CreditCardDto;
@@ -52,7 +57,7 @@ export const CreditCardStatementsContent = ({ credit_card, accounts, can_write }
 
     try {
       await pay_statement_request(credit_card.id, paying_statement.statement_key, payload);
-      message.success("Fatura paga");
+      message.success(paying_statement.phase === "OPEN" ? "Pagamento antecipado registrado" : "Pagamento registrado");
       set_paying_statement(null);
       refresh();
     } catch (error) {
@@ -62,9 +67,9 @@ export const CreditCardStatementsContent = ({ credit_card, accounts, can_write }
     }
   };
 
-  const handle_undo = async (statement: CreditCardStatementDetailDto) => {
+  const handle_undo = async (statement: CreditCardStatementDetailDto, payment: CreditCardStatementPaymentDto) => {
     try {
-      await undo_statement_payment_request(credit_card.id, statement.statement_key);
+      await undo_statement_payment_request(credit_card.id, statement.statement_key, payment.transaction_id);
       message.success("Pagamento desfeito");
       refresh();
     } catch (error) {
@@ -98,12 +103,16 @@ export const CreditCardStatementsContent = ({ credit_card, accounts, can_write }
             commitments={commitments}
             can_write={can_write}
             on_pay={set_paying_statement}
-            on_undo={handle_undo}
           />
         ) : null}
       </SideColumn>
       {selected_statement ? (
-        <StatementDetail key={selected_statement.statement_key} statement={selected_statement} />
+        <StatementDetail
+          key={selected_statement.statement_key}
+          statement={selected_statement}
+          can_write={can_write}
+          on_undo_payment={(payment) => handle_undo(selected_statement, payment)}
+        />
       ) : null}
       <StatementPaymentModal
         statement={paying_statement}

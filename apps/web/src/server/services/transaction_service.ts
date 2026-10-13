@@ -4,7 +4,10 @@ import { to_transaction_dto } from "@/server/mappers/transaction_mapper";
 import { build_transaction_filter } from "./transaction_filter_builder";
 import { calculate_transaction_summary } from "./transaction_summary_calculator";
 import { assert_category_matches_type } from "./category_kind_validator";
-import { revert_statement_purchases } from "./credit_card_statement_payment_service";
+import {
+  apply_statement_settlement,
+  plan_settlement_after_payment_removal,
+} from "./credit_card_statement_payment_service";
 import { assert_references_belong_to_workspace } from "./transaction_reference_validator";
 import { transaction_include } from "./transaction_query";
 import { resolve_created_status, resolve_updated_status } from "./transaction_status_rules";
@@ -148,14 +151,12 @@ export const delete_transaction = async (
   }
 
   const { statement_payment } = existing_transaction;
+  const settlement = statement_payment ? await plan_settlement_after_payment_removal(statement_payment) : null;
 
-  await prisma_client.$transaction(async (transaction_client) => {
-    if (statement_payment) {
-      await revert_statement_purchases(transaction_client, statement_payment);
-    }
-
-    await transaction_client.transaction.delete({ where: { id: transaction_id } });
-  });
+  await prisma_client.$transaction([
+    prisma_client.transaction.delete({ where: { id: transaction_id } }),
+    ...(settlement ? [apply_statement_settlement(settlement)] : []),
+  ]);
 };
 
 export const settle_transaction = async (

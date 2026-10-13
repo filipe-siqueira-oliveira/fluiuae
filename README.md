@@ -34,6 +34,14 @@ Um lançamento tem duas dimensões independentes:
 Compra no crédito é `EXPENSE` + `PENDING`: conta como gasto da categoria e como despesa prevista,
 sem mexer no saldo até ser efetivada. Pagar a fatura é `TRANSFER`, então não vira despesa nova.
 
+Na fatura do cartão, todas as parcelas de uma cobrança parcelada são geradas de uma vez e aparecem
+nas faturas futuras, como no app do banco. Despesas fixas no cartão só entram na fatura a partir
+do dia da cobrança.
+
+Uma fatura aceita vários pagamentos, inclusive antes de fechar (pagamento antecipado). Cada
+pagamento abate o valor em aberto e libera o limite; as compras só viram pagas quando os
+pagamentos cobrem a fatura inteira.
+
 Saldo de conta nunca é armazenado: é `initial_balance` somado aos lançamentos `PAID`.
 
 ## Permissões

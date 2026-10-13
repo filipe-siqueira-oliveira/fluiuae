@@ -18,14 +18,19 @@ const resolve_first_pending_month = (recurring_charge: RecurringCharge): Date =>
     ? next_month_start(to_month_start(recurring_charge.last_generated_month))
     : to_month_start(recurring_charge.starts_at_month);
 
+const resolve_target_month = (recurring_charge: RecurringCharge, current_month: Date): Date => {
+  const last_installment_month = resolve_last_installment_month(recurring_charge);
+
+  return recurring_charge.credit_card_id
+    ? last_installment_month
+    : earliest_month(current_month, last_installment_month);
+};
+
 const generate_installments = async (
   recurring_charge: RecurringCharge,
   current_month: Date
 ): Promise<void> => {
-  const target_month = earliest_month(
-    current_month,
-    resolve_last_installment_month(recurring_charge)
-  );
+  const target_month = resolve_target_month(recurring_charge, current_month);
   const pending_months = list_months_between(
     resolve_first_pending_month(recurring_charge),
     target_month
@@ -85,8 +90,13 @@ export const generate_due_recurring_charges = async (
   const recurring_charges = await prisma_client.recurringCharge.findMany({
     where: {
       workspace_id,
-      starts_at_month: { lte: current_month },
-      OR: [{ last_generated_month: null }, { last_generated_month: { lt: current_month } }],
+      OR: [
+        { credit_card_id: { not: null } },
+        {
+          starts_at_month: { lte: current_month },
+          OR: [{ last_generated_month: null }, { last_generated_month: { lt: current_month } }],
+        },
+      ],
     },
   });
 
